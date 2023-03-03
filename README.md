@@ -25,6 +25,7 @@ I spent a week bashing my head against the wall when this could have been set up
 - An Elastic Cluster. I connected to both a cloud and self-host intance.
 - A Mongo DB Atlas instance. The cloud hosted one.
 - helm
+- kubectl
 - (optional) argocd. It's really neat and pretty easy to install for something on k8s.
 
 ## Overview of Architecture
