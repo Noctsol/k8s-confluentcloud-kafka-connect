@@ -1,0 +1,57 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: connector-source-mongo
+  namespace: confluent
+spec:
+  name: connector
+  class: "com.mongodb.kafka.connect.MongoSourceConnector"
+  connectClusterRef:
+    name: connect
+  taskMax: 1
+  configs:
+    # You can find more info at
+    # https://www.mongodb.com/docs/kafka-connector/current/source-connector/configuration-properties/output-format/
+    connection.uri: "mongodb+srv://${file:/mnt/secrets/mongo-secrets/credentials.txt:username}:${file:/mnt/secrets/mongo-secrets/credentials.txt:password}@cmedevwkdrmongodb-pl-1.nquxj.mongodb.net/?retryWrites=true&w=majority"
+    database: mymongodb
+    collection: "mycollection"
+    topic.prefix: "source"
+    topic.suffix: "test"
+    topic.separator: "."
+    batch.size: "0"
+    poll.await.time.ms: "5000"
+    poll.max.batch.size: "1000"
+    output.json.formatter: "com.mongodb.kafka.connect.source.json.formatter.DefaultJson"
+    mongo.errors.log.enable: "true"
+
+  # I think this is how you auth to your connect cluster
+  # if you enabled it
+  # authentication:
+  #   type: basic
+  #   basic:
+  #     secretRef: connect-cluster-secrets
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: elastic-sink-connector
+  namespace: confluent
+spec:
+  name: elastic-sink-connector
+  class: "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector"
+  connectClusterRef:
+    name: connect
+  taskMax: 1
+  configs:
+    # You can find more info at
+    # https://docs.confluent.io/kafka-connectors/elasticsearch/current/configuration_options.html
+
+    # You can use http if you don't care
+    connection.url: "https://myelasticclusterurl:9200"
+    connection.username: "${file:/mnt/secrets/elastic-secrets/credentials.txt:username}"
+    connection.password: "${file:/mnt/secrets/elastic-secrets/credentials.txt:password}"
+    topics: elastic.test.sink
+    schema.ignore: "true"
+    key.ignore: "true"
+    write.method: INSERT
